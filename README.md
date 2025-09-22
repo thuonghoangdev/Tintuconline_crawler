@@ -260,7 +260,7 @@ python manage.py crawl_recent --hours 2
 
 ## 7. Giao diện
 
-- **base.html**: header, nav categories, search box
+- **base.html**: header, nav categories, search box,footer
 - **home.html**: lưới card (ảnh, tiêu đề, excerpt, meta)
 - **category.html**: danh sách bài theo danh mục
 - **article_detail.html**: nội dung sạch (HTML safe), ảnh, caption, reactions, comment box, related articles
