@@ -228,8 +228,6 @@ python manage.py runserver
 ```
 
 - App: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- Admin: [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin)
-
 ---
 
 ### 5.8. Lệnh hữu ích trong DEV
