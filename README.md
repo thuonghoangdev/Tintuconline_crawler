@@ -1,4 +1,4 @@
-# 📖 Tỉn Tuc Online  – Django All-in-One News Aggregator
+# 📖 Tin Tuc Online  – Django All-in-One News Aggregator
 
 ## Demo giao diện
 
