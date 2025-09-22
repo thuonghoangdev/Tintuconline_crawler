@@ -23,6 +23,7 @@ from web import views_auth    # API/Pages auth
 urlpatterns = [
     # Admin
     path("admin/", admin.site.urls),
+    path("submit/<int:pk>/delete/", submit_article_delete, name="submit_article_delete"),
 
     # Trang chính / danh mục / chi tiết
     path("", HomeView.as_view(), name="home"),

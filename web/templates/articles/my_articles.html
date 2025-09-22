@@ -1,5 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Bài của tôi{% endblock %}
+
+{# Chỉ áp dụng cho TRANG NÀY #}
+{% block extra_head %}
+<style>
+  /* Sticky footer như trước */
+  html, body { height: 100%; }
+  body { min-height: 100dvh; display: flex; flex-direction: column; }
+  main.container { flex: 1 0 auto; }
+  .site-footer { margin-top: auto; }
+
+  /* === FIX: card full chiều ngang cho trang này === */
+  main.container > section.card {
+    width: 100%;
+    max-width: none;   /* phòng khi có rule nào đặt max-width */
+    display: block;    /* đảm bảo không bị inline/inline-block */
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="card" style="padding:16px">
   <h2 style="margin:0 0 12px">Bài đã đăng</h2>
@@ -21,11 +40,7 @@
             {% else %}
               <div class="title">{{ a.title }}</div>
             {% endif %}
-
-            {% if a.published_at %}
-              <div class="meta">{{ a.published_at|date:"H:i d/m/Y" }}</div>
-            {% endif %}
-
+            {% if a.published_at %}<div class="meta">{{ a.published_at|date:"H:i d/m/Y" }}</div>{% endif %}
             <div class="nav" style="margin-top:8px">
               <a class="btn" href="{% url 'submit_article_edit' a.pk %}">Sửa</a>
               <a class="btn" href="{% url 'submit_article_delete' a.pk %}">Xoá</a>
@@ -37,5 +52,10 @@
   {% else %}
     <p class="muted">Bạn chưa có bài nào.</p>
   {% endif %}
+
+  <div style="margin-top:16px;display:flex;gap:10px">
+    <a class="btn" href="{% url 'submit_article' %}">Đăng bài mới</a>
+    <a class="btn" href="{% url 'submit_article' %}">Quay lại trang đăng bài</a>
+  </div>
 </section>
 {% endblock %}

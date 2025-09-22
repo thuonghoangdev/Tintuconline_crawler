@@ -2,6 +2,12 @@
 {% block title %}{% if edit_mode %}Sửa bài{% else %}Đăng bài{% endif %}{% endblock %}
 {% block content %}
 <section class="card" style="padding:18px">
+
+  <!-- Nút quay lại -->
+  <div style="margin-bottom:12px">
+    <a class="btn-back" href="{% url 'home' %}">Quay lại trang chủ</a>
+  </div>
+
   <h2 style="margin:0 0 8px">{% if edit_mode %}Sửa bài{% else %}Đăng bài{% endif %}</h2>
   <p class="muted" style="margin:0 0 14px">
     Điền tiêu đề, tóm tắt, <strong>ảnh tiêu đề</strong> và nội dung.
@@ -27,6 +33,7 @@
         <label class="lbl">Ảnh tiêu đề (URL)</label>
         {{ form.main_image_url }}
         <small class="muted">Dùng link ảnh trực tiếp (.jpg/.png…). Nếu để trống, hệ thống sẽ tự lấy ảnh đầu tiên trong nội dung.</small>
+
         <div id="imgPreviewBox" class="imgbox">
           <img id="imgPreview" alt="Xem trước" style="display:none;max-width:100%;border-radius:12px">
           <div id="imgPlaceholder" class="muted">Chưa có ảnh</div>
@@ -35,7 +42,7 @@
         <label class="lbl" style="margin-top:10px">Chuyên mục</label>
         {{ form.categories }}
 
-        <label class="lbl" style="margin-top:10px">
+        <label class="lbl" style="margin-top:10px;display:flex;gap:8px;align-items:center">
           <input type="checkbox" name="{{ form.is_visible.name }}" {% if form.is_visible.value %}checked{% endif %}>
           Hiển thị
         </label>
@@ -54,6 +61,9 @@
 </section>
 
 <style>
+  /* ---- Chỉ style tại file này ---- */
+  :root{ --ring:#e5e7eb; --ring-focus:#93c5fd; }
+
   .lbl{display:block;margin:10px 0 6px}
   .grid2{display:grid;gap:16px;grid-template-columns:1fr}
   @media(min-width:960px){.grid2{grid-template-columns:2fr 1fr}}
@@ -61,10 +71,66 @@
   .errbox{margin-top:12px;color:#fca5a5}
   .actions{display:flex;gap:10px;margin-top:14px}
   .btn.primary{background:#2563eb;border-color:#1d4ed8;color:#fff}
+
+  /* Nút quay lại */
+  .btn-back{
+    display:inline-block;padding:8px 14px;background:#e5e7eb;border-radius:8px;
+    text-decoration:none;font-weight:500;color:#111827;transition:all .2s ease;
+  }
+  .btn-back:hover{background:#d1d5db;transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+  .btn-back:active{background:#9ca3af;transform:translateY(0);box-shadow:none}
+
+  /* ====== FORM INPUTS: trả lại “stroke” + focus ring ====== */
+  /* Text/URL/Datetime */
+  section.card input[type="text"],
+  section.card input[type="url"],
+  section.card input[type="datetime-local"],
+  section.card input[type="email"],
+  section.card input[type="number"],
+  section.card textarea,
+  section.card select {
+    width: 100%;
+    padding: 12px 12px;
+    font-size: 15px;
+    border-radius: 10px;
+    border: 1.5px solid var(--ring);
+    background: #fff;
+    color: #111827;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s, transform .05s;
+    box-shadow: inset 0 1px 0 rgba(0,0,0,.02);
+  }
+
+  section.card textarea{min-height:180px;resize:vertical}
+  section.card select[multiple]{min-height:176px}
+
+  section.card input[type="text"]::placeholder,
+  section.card input[type="url"]::placeholder,
+  section.card textarea::placeholder{
+    color:#9ca3af
+  }
+
+  section.card input[type="text"]:focus,
+  section.card input[type="url"]:focus,
+  section.card input[type="datetime-local"]:focus,
+  section.card input[type="email"]:focus,
+  section.card input[type="number"]:focus,
+  section.card textarea:focus,
+  section.card select:focus{
+    border-color: var(--ring-focus);
+    box-shadow: 0 0 0 3px rgba(147,197,253,.35);
+    background:#fff;
+  }
+
+  /* Checkbox gọn gàng hơn */
+  section.card input[type="checkbox"]{
+    width:18px;height:18px;border:1.5px solid var(--ring);border-radius:4px;appearance:auto;
+  }
 </style>
 
 <script>
-  const urlInput = document.getElementById("imgUrl");
+  // Lấy đúng field ảnh theo id mặc định của Django
+  const urlInput = document.getElementById("id_main_image_url");
   const img = document.getElementById("imgPreview");
   const ph  = document.getElementById("imgPlaceholder");
 
@@ -80,6 +146,9 @@
       ph.textContent='Chưa có ảnh';
     }
   }
-  if(urlInput){ urlInput.addEventListener('input', e => show(e.target.value.trim())); show(urlInput.value.trim()); }
+  if(urlInput){
+    urlInput.addEventListener('input', e => show(e.target.value.trim()));
+    show(urlInput.value.trim());
+  }
 </script>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ category.name }} — VN News{% endblock %}
+{% block title %}{{ category.name }} — Tin Tức Online{% endblock %}
 
 {% block content %}
   <h2 style="margin:6px 0 10px 0">{{ category.name }}</h2>
@@ -27,15 +27,7 @@
     </section>
 
     {% if is_paginated %}
-      <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-        {% if page_obj.has_previous %}
-          <a class="btn" href="?page={{ page_obj.previous_page_number }}">← Trước</a>
-        {% endif %}
-        <span class="muted" style="align-self:center">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}
-          <a class="btn" href="?page={{ page_obj.next_page_number }}">Sau →</a>
-        {% endif %}
-      </div>
+      
     {% endif %}
   {% else %}
     <div class="card" style="padding:18px">

@@ -1,46 +1,124 @@
 {% extends "base.html" %}
 {% block title %}Đăng ký{% endblock %}
+
 {% block content %}
-<section class="card" style="max-width:520px;margin:0 auto;padding:18px">
-  <h2 style="margin:0 0 12px">Đăng ký</h2>
-  <form method="post" novalidate>
-    {% csrf_token %}
+<section class="auth">
+  <div class="auth-card">
+    <div class="brand">TIN TỨC</div>
+    <h2 class="title">Đăng ký</h2>
+    <p class="subtitle muted">Tạo tài khoản để bắt đầu</p>
 
-    <label style="display:block;margin:10px 0 6px">Họ và tên</label>
-    <input type="text" name="full_name" value="{{ form.full_name.value|default_if_none:'' }}"
-           class="w-full"
-           style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--card);color:var(--text)"
-           placeholder="Nguyễn Văn A" required>
+    <form method="post" novalidate>
+      {% csrf_token %}
 
-    <label style="display:block;margin:12px 0 6px">Email hoặc SĐT</label>
-    <input type="text" name="email_or_mobile" value="{{ form.email_or_mobile.value|default_if_none:'' }}"
-           class="w-full"
-           style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--card);color:var(--text)"
-           placeholder="email@vd.com hoặc 09xxxxxxxx" required>
+      <div class="field">
+        <label class="label" for="id_full_name">Họ và tên</label>
+        <input
+          class="input"
+          type="text"
+          name="full_name"
+          id="id_full_name"
+          value="{{ form.full_name.value|default_if_none:'' }}"
+          placeholder="Nguyễn Văn A"
+          required
+        />
+        {% if form.full_name.errors %}{% for e in form.full_name.errors %}<p class="error">{{ e }}</p>{% endfor %}{% endif %}
+      </div>
 
-    <label style="display:block;margin:12px 0 6px">Mật khẩu</label>
-    <input type="password" name="password1"
-           class="w-full"
-           style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--card);color:var(--text)"
-           placeholder="••••••••" required>
+      <div class="field">
+        <label class="label" for="id_email_or_mobile">Email hoặc SĐT</label>
+        <input
+          class="input"
+          type="text"
+          name="email_or_mobile"
+          id="id_email_or_mobile"
+          value="{{ form.email_or_mobile.value|default_if_none:'' }}"
+          placeholder="email@vd.com hoặc 09xxxxxxxx"
+          required
+        />
+        {% if form.email_or_mobile.errors %}{% for e in form.email_or_mobile.errors %}<p class="error">{{ e }}</p>{% endfor %}{% endif %}
+      </div>
 
-    <label style="display:block;margin:12px 0 6px">Xác nhận mật khẩu</label>
-    <input type="password" name="password2"
-           class="w-full"
-           style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--card);color:var(--text)"
-           placeholder="••••••••" required>
+      <div class="field">
+        <label class="label" for="id_password1">Mật khẩu</label>
+        <div class="input-wrap">
+          <input
+            class="input"
+            type="password"
+            name="password1"
+            id="id_password1"
+            placeholder="••••••••"
+            required
+          />
+          <span class="icon" onclick="
+            const p1=document.getElementById('id_password1');
+            p1.type=(p1.type==='password'?'text':'password')
+          ">👁️</span>
+        </div>
+        {% if form.password1.errors %}{% for e in form.password1.errors %}<p class="error">{{ e }}</p>{% endfor %}{% endif %}
+      </div>
 
-    {% if form.errors %}
-      <div class="text-red-400" style="margin-top:8px">{{ form.errors }}</div>
-    {% endif %}
+      <div class="field">
+        <label class="label" for="id_password2">Xác nhận mật khẩu</label>
+        <div class="input-wrap">
+          <input
+            class="input"
+            type="password"
+            name="password2"
+            id="id_password2"
+            placeholder="••••••••"
+            required
+          />
+          <span class="icon" onclick="
+            const p2=document.getElementById('id_password2');
+            p2.type=(p2.type==='password'?'text':'password')
+          ">👁️</span>
+        </div>
+        {% if form.password2.errors %}{% for e in form.password2.errors %}<p class="error">{{ e }}</p>{% endfor %}{% endif %}
+      </div>
 
-    <button class="btn" style="margin-top:14px;width:100%;justify-content:center;background:#16a34a;border-color:#15803d;color:#fff">
-      Tạo tài khoản
-    </button>
-  </form>
+      {% if form.non_field_errors %}
+        {% for e in form.non_field_errors %}<p class="error">{{ e }}</p>{% endfor %}
+      {% endif %}
 
-  <div class="muted" style="margin-top:12px;text-align:center">
-    Đã có tài khoản? <a class="muted" href="{% url 'login' %}" style="color:#7cc0ff">Đăng nhập</a>
+      <button type="submit" class="btn-success">Tạo tài khoản</button>
+    </form>
+
+    <p class="muted" style="margin-top:14px;text-align:center">
+      Đã có tài khoản?
+      <a class="link" href="{% url 'login' %}">Đăng nhập</a>
+    </p>
   </div>
 </section>
+
+<style>
+  /* Giữ nguyên theme .auth trong base; chỉ thêm màu nút xanh lá cho trang đăng ký */
+  .auth .btn-success{
+    margin-top:14px;
+    width:100%;
+    padding:12px 16px;
+    border:none; border-radius:10px;
+    font-weight:700; font-size:15px;
+    color:#fff; background:#0284C7;                /* xanh lá */
+    cursor:pointer;
+    transition:background .2s, transform .1s, box-shadow .2s;
+    box-shadow:0 2px 6px rgba(34,197,94,.35);
+  }
+  .auth .btn-success:hover{
+    background:#0323f3;                            /* hover đậm */
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(22,163,74,.45);
+  }
+  .auth .btn-success:active{
+    background:#15803d;                            /* active đậm hơn */
+    transform:translateY(0);
+  }
+
+  /* Icon mắt trong input password (dùng cùng .input-wrap đã có trong base.style) */
+  .auth .input-wrap{ position:relative; }
+  .auth .input-wrap .icon{
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    width:22px; height:22px; display:grid; place-items:center; cursor:pointer; opacity:.8;
+  }
+</style>
 {% endblock %}

@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 from typing import Dict, Any
 
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate, get_user_model
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.views import PasswordResetView
 from django.http import JsonResponse, HttpRequest
@@ -15,8 +15,9 @@ from django.views.decorators.http import require_POST
 
 from articles.models import Article
 from web.models import Comment
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm
 
+User = get_user_model()
 
 # ---------------------------------------------------------------------
 # Helpers
@@ -36,21 +37,47 @@ def _json_err(errors: Dict[str, Any] | None = None, status: int = 400) -> JsonRe
     return JsonResponse({"ok": False, "errors": errors or {"__all__": ["Error"]}}, status=status)
 
 
+def _normalize_identifier_to_username(identifier: str) -> str | None:
+    """
+    Cho phép người dùng gõ username HOẶC email vào ô 'username'.
+    Nếu là email -> tra username tương ứng.
+    """
+    ident = (identifier or "").strip()
+    if not ident:
+        return None
+    if "@" in ident:
+        try:
+            u = User.objects.get(email__iexact=ident)
+            return u.username
+        except User.DoesNotExist:
+            return None
+    return ident
+
+
 # ---------------------------------------------------------------------
 # Page views (form HTML)
 # ---------------------------------------------------------------------
+@csrf_protect
 def page_login(request: HttpRequest):
-    """Trang đăng nhập (HTML form)."""
+    """Trang đăng nhập (HTML form) - nhận username HOẶC email."""
     if request.user.is_authenticated:
         return redirect("home")
 
-    form = LoginForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        user = form.cleaned_data["user"]
-        auth_login(request, user)
-        return redirect(request.GET.get("next") or reverse("home"))
+    if request.method == "POST":
+        raw_username = request.POST.get("username", "")
+        password = request.POST.get("password", "")
+        username = _normalize_identifier_to_username(raw_username)
 
-    return render(request, "auth/login.html", {"form": form})
+        if not username:
+            return render(request, "auth/login.html", {"form": {"errors": True}})
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            return redirect(request.GET.get("next") or reverse("home"))
+        return render(request, "auth/login.html", {"form": {"errors": True}})
+
+    return render(request, "auth/login.html")
 
 
 def page_register(request: HttpRequest):
@@ -90,7 +117,7 @@ def api_register(request: HttpRequest):
         user = form.save(request)
         auth_login(request, user)
         return _json_ok()
-    except Exception as e:  # luôn chặn để không crash
+    except Exception as e:
         return _json_err({"__all__": [str(e) or "Register error"]}, status=500)
 
 
@@ -98,14 +125,21 @@ def api_register(request: HttpRequest):
 @csrf_protect
 def api_login(request: HttpRequest):
     """
-    API đăng nhập: email_or_mobile + password.
+    API đăng nhập: username (hoặc email) + password.
     Trả JSON: { ok, errors? }.
     """
     try:
-        form = LoginForm(request.POST)
-        if not form.is_valid():
-            return _json_err(form.errors, status=400)
-        user = form.cleaned_data["user"]
+        raw_username = request.POST.get("username", "")
+        password = request.POST.get("password", "")
+        username = _normalize_identifier_to_username(raw_username)
+
+        if not username:
+            return _json_err({"username": ["User không tồn tại"]}, status=400)
+
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return _json_err({"__all__": ["Thông tin đăng nhập chưa đúng"]}, status=400)
+
         auth_login(request, user)
         return _json_ok()
     except Exception as e:
@@ -117,11 +151,6 @@ def api_login(request: HttpRequest):
 def api_guest_comment(request: HttpRequest):
     """
     API bình luận không cần đăng nhập.
-    Bắt buộc:
-      - full_name (>=2)
-      - email (email hợp lệ hoặc SĐT VN)
-      - content (>=3)
-      - article_id
     """
     try:
         full_name = (request.POST.get("full_name") or "").strip()
@@ -129,7 +158,6 @@ def api_guest_comment(request: HttpRequest):
         content = (request.POST.get("content") or "").strip()
         article_id = request.POST.get("article_id")
 
-        # Validate
         if len(full_name) < 2:
             return _json_err({"full_name": ["Tên quá ngắn"]}, status=400)
         if not (_phone_re.fullmatch(email_or_phone) or _email_re.fullmatch(email_or_phone)):
@@ -144,7 +172,7 @@ def api_guest_comment(request: HttpRequest):
             author=full_name[:120],
             email=email_or_phone,
             content=content,
-            is_approved=True,  # đổi False nếu muốn duyệt trước
+            is_approved=True,
         )
 
         return _json_ok(
@@ -165,10 +193,7 @@ def api_guest_comment(request: HttpRequest):
 # Forgot password page
 # ---------------------------------------------------------------------
 class ForgotPasswordView(PasswordResetView):
-    """
-    Trang 'Quên mật khẩu?'
-    (Dev mặc định dùng EMAIL_BACKEND console/locmem — xem settings.)
-    """
+    """Trang 'Quên mật khẩu?'."""
     form_class = PasswordResetForm
     template_name = "auth/password_reset_form.html"
     email_template_name = "auth/password_reset_email.txt"

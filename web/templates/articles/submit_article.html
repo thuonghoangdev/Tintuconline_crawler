@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{% if editing %}Sửa bài{% else %}Đăng bài{% endif %} — VN News{% endblock %}
 {% block content %}
-<h2 style="margin:8px 0 14px;font-weight:800">{% if editing %}Sửa bài{% else %}Đăng bài mới{% endif %}</h2>
+<h2 style="margin:8px 0 14px;font-weight:800">
+  {% if editing %}Sửa bài{% else %}Đăng bài mới{% endif %}
+</h2>
 
 <form method="post" novalidate>
   {% csrf_token %}
+
   {% if messages %}
     <div class="muted" style="margin-bottom:8px">
       {% for m in messages %}<div>{{ m }}</div>{% endfor %}
@@ -66,8 +69,11 @@
 
     <div class="hr"></div>
     <div style="display:flex;gap:10px">
-      <button class="btn" type="submit">{% if editing %}Lưu thay đổi{% else %}Đăng bài{% endif %}</button>
+      <button class="btn" type="submit">
+        {% if editing %}Lưu thay đổi{% else %}Đăng bài{% endif %}
+      </button>
       <a class="btn" href="{% url 'my_articles' %}">Bài của tôi</a>
+      <a class="btn" href="{% url 'home' %}">Quay lại</a>
     </div>
   </div>
 </form>

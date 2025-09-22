@@ -1,45 +1,60 @@
 {% extends "base.html" %}
-{% block title %}Đăng nhập{% endblock %}
+{% block title %}Đăng nhập · TIN TỨC{% endblock %}
+
+{# TẮT thanh tabs cho trang login #}
+{% block nav %}{% endblock %}
 
 {% block content %}
-<section class="card" style="max-width:520px;margin:0 auto;padding:18px">
-  <h2 style="margin:0 0 12px">Đăng nhập</h2>
+<section class="auth">
+  <div class="auth-card">
+    <div class="brand">TIN TỨC</div>
+    <h1 class="title">Chào mừng trở lại</h1>
+    <p class="subtitle muted">Đăng nhập để tiếp tục</p>
 
-  <form method="post" novalidate>
-    {% csrf_token %}
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="field">
+        <label class="label" for="id_username">Email hoặc Username</label>
+        <input class="input" id="id_username" name="username" type="text" required />
+      </div>
 
-    <label style="display:block;margin:10px 0 6px">Email hoặc SĐT</label>
-    <input type="text" name="email_or_mobile" value="{{ form.email_or_mobile.value|default_if_none:'' }}"
-           class="w-full"
-           style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--card);color:var(--text)"
-           placeholder="email@vd.com hoặc 09xxxxxxxx" required>
+      <div class="field">
+        <label class="label" for="id_password">Mật khẩu</label>
+        <div class="input-wrap">
+          <input class="input" id="id_password" name="password" type="password" required />
+          <span class="icon" onclick="
+            const p=document.getElementById('id_password');
+            p.type=(p.type==='password'?'text':'password')
+          ">👁️</span>
+        </div>
+      </div>
 
-    <label style="display:block;margin:12px 0 6px">Mật khẩu</label>
-    <input type="password" name="password"
-           class="w-full"
-           style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--card);color:var(--text)"
-           placeholder="••••••••" required>
-
-    {% if form.non_field_errors %}
-      <ul class="text-red-400" style="margin-top:8px">
-        {% for err in form.non_field_errors %}
-          <li>{{ err }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-    {% for field in form.visible_fields %}
-      {% if field.errors %}
-        <div class="text-red-400" style="margin-top:6px">{{ field.errors }}</div>
+      {% if form and form.errors %}
+        <p class="error">Thông tin đăng nhập chưa đúng. Vui lòng thử lại.</p>
       {% endif %}
-    {% endfor %}
 
-    <button class="btn" style="margin-top:14px;width:100%;justify-content:center;background:#2563eb;border-color:#1d4ed8;color:#fff">
-      Đăng nhập
-    </button>
-  </form>
+      <button class="btn-accent" type="submit">Đăng nhập</button>
 
-  <div class="muted" style="margin-top:12px;text-align:center">
-    Chưa có tài khoản? <a class="muted" href="{% url 'register' %}" style="color:#7cc0ff">Đăng ký</a>
+      <p class="muted" style="margin-top:12px">
+        Chưa có tài khoản?
+        <a class="link" href="{% url 'register' %}">Đăng ký ngay</a>
+      </p>
+    </form>
   </div>
 </section>
+
+<style>
+  .auth .input-wrap{ position:relative; }
+  .auth .input-wrap .icon{
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    width:22px; height:22px; display:grid; place-items:center;
+    cursor:pointer; opacity:.7;
+  }
+  .auth .input-wrap .icon:hover{ opacity:1; }
+  .auth .btn-accent:hover{
+    background:#0b78d1; transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(11,120,209,0.35);
+  }
+  .auth .btn-accent:active{ background:#075a9c; transform:translateY(0); }
+</style>
 {% endblock %}

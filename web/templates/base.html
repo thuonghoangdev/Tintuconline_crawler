@@ -3,111 +3,392 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{% block title %}VN News{% endblock %}</title>
+  <title>{% block title %}Tin Tức Online{% endblock %}</title>
+
   <style>
+    /* ====== Keyframes dùng chung ====== */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeZoom {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ====== Hero ====== */
+.hero-card {
+  animation: fadeZoom .7s ease both;
+  animation-delay: .1s; /* Hero xuất hiện đầu tiên */
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+.hero-card:hover {
+  transform: translateY(-14px) scale(1.05);
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.25),
+    0 28px 56px rgba(0,0,0,.35); /* bóng 2 lớp rõ hơn */
+}
+
+/* ====== Trending box ====== */
+.trend-box {
+  animation: fadeSlideIn .7s ease both;
+  animation-delay: .3s; /* sau Hero */
+}
+.trend-item {
+  transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+  border-radius: 10px;
+}
+.trend-item:hover {
+  transform: translateX(10px) translateY(-3px);
+  box-shadow:
+    0 6px 12px rgba(0,0,0,.14),
+    0 14px 28px rgba(0,0,0,.22);
+  background: #f9fafb;
+}
+
+/* ====== Cards grid ====== */
+.grid.cards .card {
+  animation: fadeSlideUp .6s ease both;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+
+/* hiệu ứng delay theo thứ tự */
+.grid.cards .card:nth-child(1) { animation-delay: .4s; }
+.grid.cards .card:nth-child(2) { animation-delay: .55s; }
+.grid.cards .card:nth-child(3) { animation-delay: .7s; }
+.grid.cards .card:nth-child(4) { animation-delay: .85s; }
+.grid.cards .card:nth-child(5) { animation-delay: 1s; }
+/* … có thể thêm tiếp nếu nhiều card hơn */
+
+/* Hover cho card */
+.grid.cards .card:hover {
+  transform: translateY(-12px) scale(1.03);
+  box-shadow:
+    0 12px 24px rgba(0,0,0,.20),
+    0 26px 52px rgba(0,0,0,.28);
+}
+
+    /* ====== Auth theme (giữ nguyên) ====== */
+    .auth{
+      --accent-100:#EAF7FD; --accent-500:#38BDF8; --accent-600:#0EA5E9; --accent-700:#0284C7;
+      --auth-card:#ffffff; --auth-ring:#e5e7eb; --auth-text:#1f2937; --auth-muted:#6b7280;
+      --auth-shadow:0 4px 12px rgba(0,0,0,.06); --auth-radius:14px; color:var(--auth-text);
+    }
+    .auth .auth-card{max-width:520px;margin:0 auto;padding:22px;background:var(--auth-card);
+      border-radius:var(--auth-radius);box-shadow:var(--auth-shadow);border:1px solid var(--auth-ring)}
+    .auth .field{margin-bottom:16px}
+    .auth .label{display:block;margin-bottom:6px;font-weight:500;color:#374151}
+    .auth .input{width:100%;padding:12px;font-size:15px;border-radius:10px;border:1px solid var(--auth-ring);
+      background:var(--accent-100);color:#111827;outline:none;transition:border .2s,box-shadow .2s,background .2s}
+    .auth .input:focus{background:#fff;border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.2)}
+    .auth .btn-accent{display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      padding:12px 20px;width:100%;border:none;border-radius:999px;font-weight:700;font-size:14px;letter-spacing:.3px;
+      color:#fff;background:var(--accent-500);cursor:pointer;transition:background .25s,transform .15s,box-shadow .15s;
+      box-shadow:0 2px 6px rgba(56,189,248,.35)}
+    .auth .btn-accent:hover{background:var(--accent-600);transform:translateY(-2px)}
+    .auth .btn-accent:active{background:var(--accent-700);transform:translateY(0)}
+    .auth .muted{color:var(--auth-muted)}
+    .auth .link{color:var(--accent-600);text-decoration:none;font-weight:600}
+    .auth .error{color:#dc2626;font-size:14px}
+    .auth .brand{color:var(--accent-600);font-weight:800}
+    .auth .title{margin:0 0 16px;color:var(--auth-text);font-weight:800;font-size:28px}
+    .auth .subtitle{margin:0 0 6px;color:var(--auth-muted)}
+
     :root{
-      --bg:#0e1116; --card:#161a22; --muted:#8a94a7; --text:#e6ebf5; --brand:#3ea6ff;
-      --ring:#263247; --border:#1f2530; --accent:#1b2432;
+      --bg:#f6f7fb; --surface:#ffffff; --text:#0f172a; --muted:#6b7280;
+      --brand:#2563eb; --brand-600:#1d4ed8; --brand-700:#1e40af;
+      --border:#e5e7eb; --shadow:0 10px 30px rgba(2,6,23,.06);
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
-      font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue","Noto Sans",Arial}
-    a{color:var(--text);text-decoration:none}
-    a:hover{color:#fff}
-    .container{max-width:1100px;margin:0 auto;padding:24px}
-    .header{display:flex;gap:18px;align-items:center;justify-content:space-between;margin-bottom:18px}
-    .brand{font-weight:800;font-size:22px;color:#7cc0ff}
+      font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    a{color:inherit;text-decoration:none}
+
+    /* Container */
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+
+    /* Header */
+    .header{max-width:1200px;margin:0 auto;padding:14px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between}
+    .brand{font-weight:900;font-size:28px;color:var(--brand)}
     .search{flex:1;display:flex;justify-content:center}
-    .search form{width:100%;max-width:680px;display:flex;gap:8px}
-    .search input,
-    .search select{
-      padding:12px 14px;border-radius:12px;border:1px solid var(--ring);
-      background:var(--card);color:var(--text);outline:0;font-size:15px
+    .search form{width:100%;max-width:700px;position:relative}
+    .search input{width:100%;height:48px;padding:0 48px 0 16px;border-radius:999px;border:1px solid var(--border);background:#fff;outline:0;box-shadow:var(--shadow)}
+    .search form::after{
+      content:"";position:absolute;right:16px;top:50%;transform:translateY(-50%);
+      width:20px;height:20px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='gray'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z'/%3E%3C/svg%3E") no-repeat center/contain;
     }
-    .search input{flex:1}
-    .search select{min-width:130px}
-    .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-    .chip{
-      display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      background:var(--accent);color:var(--text);font-size:13px
-    }
-    .muted{color:var(--muted)}
-    .grid{display:grid;gap:16px}
-    .grid.cards{grid-template-columns:repeat(1,minmax(0,1fr))}
-    @media(min-width:640px){.grid.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(min-width:960px){.grid.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-    .card .cover{display:block;background:#0b0f15}
-    .card .cover img{width:100%;height:200px;object-fit:cover;display:block}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;font-weight:700;cursor:pointer;height:44px;padding:0 18px}
+    .btn-outline{border:2px solid var(--brand);color:var(--brand);background:#fff}
+    .btn-outline:hover{background:#eff6ff}
+    .btn-primary{border:2px solid var(--brand);background:var(--brand);color:#fff}
+    .btn-primary:hover{background:var(--brand-600)}
+
+    /* Tabs */
+    .nav{border-top:1px solid var(--border);background:#fff}
+    .tabs{max-width:1200px;margin:0 auto;display:flex;gap:14px;flex-wrap:wrap;padding:12px 20px}
+    .tab{padding:10px 18px;border-radius:999px;font-weight:700;color:#374151}
+    .tab:hover{background:#f3f4f6}
+    .tab.is-active{background:var(--brand);color:#fff;box-shadow:var(--shadow)}
+
+    /* Section title */
+    h2.section-title{font-size:24px;font-weight:900;margin:8px 0 14px}
+    h2.section-title::after{content:"";display:block;width:56px;height:3px;background:#3b82f6;border-radius:999px;margin-top:6px}
+
+    /* Cards grid (dùng cho trang chủ) */
+    .grid.cards{display:grid;gap:18px;grid-template-columns:repeat(1,minmax(0,1fr))}
+    @media(min-width:700px){.grid.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(min-width:1024px){.grid.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    .card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+    .card .cover{display:block}
+    .card .cover img{width:100%;height:220px;object-fit:cover;display:block;background:#0b0f15}
     .card .body{padding:14px}
-    .title{font-weight:700;font-size:18px;line-height:1.35;margin:4px 0 6px}
-    .excerpt{font-size:14px;color:var(--muted)}
-    .meta{font-size:12px;color:var(--muted)}
-    .btn{
-      display:inline-flex;gap:8px;align-items:center;
-      padding:10px 12px;border-radius:10px;border:1px solid var(--border);
-      background:var(--accent);color:var(--text);cursor:pointer
-    }
-    .btn:hover{border-color:var(--ring)}
+    .card .title{font-weight:800;font-size:18px;line-height:1.35;display:block;margin:0 0 6px}
+    .card .excerpt{font-size:14px;color:var(--muted);margin:0 0 8px}
+    .card .meta{font-size:13px;color:var(--muted)}
     .hr{height:1px;background:var(--border);margin:18px 0}
 
-    /* =========================
-       ẢNH TRONG BÀI — ANTI-DISTORT
-       ========================= */
-    .prose figure{margin:14px 0}
-    .prose figcaption{margin-top:6px;font-size:0.92rem;color:var(--muted)}
-    .prose figure img,
-    .prose img{
-      display:block;max-width:100%;height:auto;
-      border-radius:12px;max-height:72vh;object-fit:contain;background:#0b0f15;
+    /* ======================= NEW: Pager in-grid + sticky + animations (NO JS) ======================= */
+    @keyframes pagerFadeSlideUp {
+      from { opacity: 0; transform: translateY(10px) }
+      to   { opacity: 1; transform: translateY(0) }
     }
-    .prose img[width], .prose img[height]{width:auto !important;height:auto !important}
-    #article > img{
-      width:100%;max-height:440px;object-fit:cover;display:block;border-radius:12px;background:#0b0f15;
+    @keyframes pagerPress {
+      0% { transform: scale(1) }
+      50%{ transform: scale(.96) }
+      100%{ transform: scale(1) }
     }
-    .rel-grid .card .cover img{
-      width:100%;height:220px;object-fit:cover;display:block;border-radius:12px;background:#0b0f15;
+
+    .pager--in-grid{
+      grid-column: 1 / -1;
+      position: sticky; bottom: max(16px, env(safe-area-inset-bottom));
+      z-index: 5;
+
+      display:flex; align-items:center; justify-content:center; gap:14px;
+      padding: 8px 12px; border-radius: 999px;
+
+      /* Glassy */
+      background: rgba(255,255,255,.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      box-shadow:
+        0 1px 2px rgba(2,6,23,.04),
+        0 8px 24px rgba(2,6,23,.08);
+
+      animation: pagerFadeSlideUp .32s ease both;
+      transition: box-shadow .24s ease, background .24s ease, border-color .24s ease, transform .22s ease, opacity .22s ease;
     }
+    .pager--in-grid:hover{
+      background: rgba(255,255,255,.86);
+      box-shadow:
+        0 1px 2px rgba(2,6,23,.05),
+        0 10px 30px rgba(2,6,23,.10);
+    }
+    .pager--in-grid:focus-within{
+      outline: 3px solid color-mix(in srgb, var(--brand) 46%, transparent);
+      outline-offset: 2px;
+    }
+
+    .pager--in-grid .pager-info{
+      color: var(--muted);
+      font-weight:700;
+      letter-spacing:.2px;
+      font-size:14px;
+      margin-right:6px;
+      white-space:nowrap;
+      opacity:.9;
+    }
+
+    .pager--in-grid .pager-btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 16px; border-radius:999px;
+      border:1.5px solid color-mix(in srgb, var(--brand) 35%, var(--border));
+      background:#fff; color:#111827; font-weight:800;
+      text-decoration:none;
+      transition: transform .12s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease, filter .18s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pager--in-grid .pager-btn:hover{
+      background:#f8fafc; border-color: color-mix(in srgb, var(--brand) 55%, var(--border));
+      transform: translateY(-1px);
+      box-shadow:0 8px 18px rgba(29,78,216,.12);
+    }
+    .pager--in-grid .pager-btn:active{
+      animation: pagerPress .18s ease;
+      box-shadow:none;
+      transform:none;
+    }
+    .pager--in-grid .pager-btn:focus-visible{
+      outline: 3px solid color-mix(in srgb, var(--brand) 58%, transparent);
+      outline-offset: 2px;
+    }
+    .pager--in-grid .pager-btn.primary{
+      border-color: var(--brand);
+      color: var(--brand);
+      background:#fff;
+    }
+    .pager--in-grid .pager-btn.is-disabled,
+    .pager--in-grid .pager-btn[aria-disabled="true"]{
+      opacity:.45; pointer-events:none; filter:grayscale(.1);
+    }
+
+    /* Mobile */
+    @media (max-width:480px){
+      .pager--in-grid{ gap:8px; padding:7px 8px }
+      .pager--in-grid .pager-info{ display:none } /* tiết kiệm không gian */
+      .pager--in-grid .pager-btn{ padding:9px 13px }
+    }
+
+    /* Dark mode */
+    @media (prefers-color-scheme: dark){
+      .pager--in-grid{
+        background: rgba(17,24,39,.65);
+        border-color: #1f2937;
+        box-shadow:
+          0 1px 2px rgba(0,0,0,.25),
+          0 10px 26px rgba(0,0,0,.40);
+      }
+      .pager--in-grid .pager-btn{
+        background:#0b1220; color:#e5e7eb; border-color:#334155;
+      }
+      .pager--in-grid .pager-btn:hover{
+        background:#0f172a; border-color:#475569; box-shadow:0 8px 18px rgba(0,0,0,.45);
+      }
+      .pager--in-grid .pager-btn.primary{
+        color:#93c5fd; border-color:#3b82f6;
+      }
+    }
+    
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .pager--in-grid{ animation:none; transition:none ;margin-bottom: 18px;}
+      .pager--in-grid .pager-btn{ transition:none }
+      .pager--in-grid .pager-btn:active{ animation:none }
+    }
+
+    /* Footer */
+    footer.site-footer{background:#0f172a;color:#cbd5e1;margin-top:40px}
+    .footer-inner{max-width:1200px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1.8fr;gap:22px}
+    .footer-title{margin:0 0 8px;color:#fff}
+    .footer-desc{margin:0 0 12px;color:#9ca3af}
+    .footer-col h4{margin:0 0 10px;color:#e2e8f0}
+    .footer-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+    .newsletter{display:flex;gap:8px}
+    .newsletter input{flex:1;padding:10px 12px;border-radius:999px;border:1px solid #334155;background:#111827;color:#e5e7eb}
+    .newsletter .btn{height:42px}
+    @media(max-width:auto){.footer-inner{grid-template-columns:1fr}}
   </style>
+
   {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <header class="container header">
-    <a class="brand" href="{% url 'home' %}">VN News</a>
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <a class="brand" href="{% url 'home' %}">Tin Tức Online</a>
 
     <div class="search">
       <form method="get" action="{% url 'home' %}">
-        <input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Tìm bài..." />
+        <input name="q" value="{{ request.GET.q|default:'' }}" placeholder="Tìm kiếm tin tức..." />
       </form>
     </div>
 
     <div>
       {% if request.user.is_authenticated %}
-        <a class="btn" href="{% url 'submit_article' %}">Đăng bài</a>
-        <a class="chip" href="{% url 'my_articles' %}" style="margin-left:6px">Bài của tôi</a>
-        <a class="chip" href="{% url 'logout' %}" style="margin-left:6px">Đăng xuất</a>
+        <a class="btn btn-primary" href="{% url 'submit_article' %}">Đăng bài</a>
+        <a class="btn btn-outline" href="{% url 'my_articles' %}" style="margin-left:8px">Bài của tôi</a>
+        <a class="btn btn-outline" href="{% url 'logout' %}" style="margin-left:8px">Đăng xuất</a>
       {% else %}
-        <a class="btn" href="{% url 'login' %}">Đăng nhập</a>
-        <a class="chip" href="{% url 'register' %}" style="margin-left:6px">Đăng ký</a>
+        <a class="btn btn-outline" href="{% url 'login' %}">Đăng nhập</a>
+        <a class="btn btn-primary" href="{% url 'register' %}" style="margin-left:8px">Đăng ký</a>
       {% endif %}
     </div>
   </header>
 
-
-  <nav class="container nav">
-    {% if categories %}
+  <!-- ===== NAV TABS ===== -->
+  {% if categories %}
+  <nav class="nav">
+    <div class="tabs">
+      <a class="tab {% if request.resolver_match and request.resolver_match.url_name == 'home' %}is-active{% endif %}" href="{% url 'home' %}">Tất cả</a>
       {% for c in categories %}
-        <a class="chip" href="{% url 'category' slug=c.slug %}">{{ c.name }}</a>
+        <a class="tab {% if request.resolver_match and request.resolver_match.url_name == 'category' and category and c.slug == category.slug %}is-active{% endif %}"
+           href="{% url 'category' slug=c.slug %}">{{ c.name }}</a>
       {% endfor %}
-    {% endif %}
+    </div>
   </nav>
+  {% endif %}
 
+  <!-- ===== MAIN ONLY ONE CONTENT BLOCK ===== -->
   <main class="container">
     {% block content %}{% endblock %}
+
+    {# ===== PAGER mới (HTML thuần, không JS) ===== #}
+    {% if page_obj %}
+      <nav class="pager--in-grid" aria-label="Phân trang">
+        <span class="pager-info">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_previous %}
+          <a class="pager-btn"
+             href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+             rel="prev" aria-label="Trang trước">← Trước</a>
+        {% else %}
+          <span class="pager-btn is-disabled" aria-disabled="true">← Trước</span>
+        {% endif %}
+
+        {% if page_obj.has_next %}
+          <a class="pager-btn primary"
+             href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+             rel="next" aria-label="Trang sau">Sau →</a>
+        {% else %}
+          <span class="pager-btn primary is-disabled" aria-disabled="true">Sau →</span>
+        {% endif %}
+      </nav>
+    {% endif %}
+    {# /Pager #}
   </main>
 
-  <footer class="container" style="margin:40px 0 24px;color:var(--muted);text-align:center">
-    © VN News
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <h3 class="footer-title">Tin Tức Online</h3>
+        <p class="footer-desc">Cập nhật tin tức 24/7: kinh tế, công nghệ, thể thao, giải trí và nhiều lĩnh vực khác.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Danh mục</h4>
+        <ul class="footer-list">
+          <li>Công nghệ</li><li>Giáo dục</li><li>Kinh tế</li><li>Thể thao</li><li>Thời sự</li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Về chúng tôi</h4>
+        <ul class="footer-list">
+          <li>Giới thiệu</li><li>Liên hệ</li><li>Tuyển dụng</li><li>Quảng cáo</li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Đăng ký nhận tin</h4>
+        <div class="newsletter">
+          <input placeholder="Email của bạn">
+          <button class="btn btn-primary">Đăng ký</button>
+        </div>
+        <ul class="footer-list" style="margin-top:10px">
+          <li>📍 123 Đường ABC, Quận XYZ</li>
+          <li>☎ 028 1234 5678</li>
+          <li>✉ info@tintuc.online</li>
+        </ul>
+      </div>
+    </div>
   </footer>
 
   {% block extra_scripts %}{% endblock %}
