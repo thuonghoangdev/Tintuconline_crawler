@@ -1,4 +1,4 @@
-# 📖 VN News – Django All-in-One News Aggregator
+# 📖 Tỉn Tuc Online  – Django All-in-One News Aggregator
 
 ## Demo giao diện
 
